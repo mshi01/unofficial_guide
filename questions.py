@@ -25,7 +25,7 @@ QUESTIONS = [
     # {"question": "...", "expects": "..."},
     {"question": "Which dining hall is the furthest from anywhere", "expects": "Pellew"},
     {"question": "Which dining hall serves grab-and-go refrigerated sandwiches?", "expects": "Atrium"},
-    {"question": "When will the sandwiches be restocked after picked clean after 1:15pm weekdays?", "expects": "next morning"},
+    {"question": "When will the sandwiches be restocked after picked clean after 1:15pm weekdays in The Atrium Dining Hall?", "expects": "next morning"},
     {"question": "What worth knowing about the salad bar in Kestrel Commons after 1:30pm?", "expects": "wilts"},
     {"question": "Which dining hall opens till midnight?", "expects": "Verrill"},
 ]

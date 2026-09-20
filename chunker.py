@@ -97,6 +97,11 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
       - Would splitting on paragraph breaks keep more thoughts intact than
         splitting on a character count?
     """
+    """
+    The corpus campus_life contains 88 documents, each document has 317 characters on average (shortest 178, longest 549). 
+    They are all short reviews. Each documents start with a heading line. Each paragargh contains several short sentences of review.
+    Thus I would like to split the document on paragraph breaks. And ignoring the first paragaph since it unusally is a heading line.
+    """
     chunks: list[Chunk] = []
 
     for doc in documents:

@@ -109,14 +109,19 @@ The good: cheapest housing tier by about $900 a year, and the singles are real s
      visible. Milestone 4. -->
 
 **Question:**
+When will the sandwiches be restocked after picked clean after 1:15pm weekdays in the Atrium Dining Hall?
 
 **Answer:**
+(best distance 0.334, cutoff 0.5)
 
+After being picked clean, the sandwiches are not restocked again until the next morning (dining_the_atrium.txt and dining_the_atrium_followup.txt).
+
+Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_followup.txt, dining_the_atrium.txt, dining_the_atrium_followup.txt
 ```
 ```
 
 **My relevance cutoff:**
-
+0.5
 <!-- The number you set in config.py, and how you got there.
 
      You ran five questions your corpus covers and the five in OUT_OF_SCOPE
@@ -128,7 +133,20 @@ The good: cheapest housing tier by about $900 a year, and the singles are real s
 
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| Which dining hall is the furthest from anywhere? | Yes | 0.3991 |
+| Which dining hall serves grab-and-go refrigerated sandwiches? | Yes | 0.4756 |
+| When will the sandwiches be restocked after picked clean after 1:15pm weekdays in The Atrium Dining Hall? | Yes | 0.3339|
+| What worth knowing about the salad bar in Kestrel Commons after 1:30pm? | Yes |0.4208 |
+| Which dining hall opens till midnight? | Yes | 0.4275 |
+| What is the capital of Mongolia? | No | 0.8641 |
+| How do I change the oil in a diesel engine? | No | 0.9106 |
+| Who won the 1994 World Cup? | No | 0.8736 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.8243 |
+| How do I write a for loop in Rust? | No | 0.8313 |
+
+As shown in the table, there is a clean gap between the in-corpus max (0.4756) and out-of-corpus max (0.8243). 
+
+I would like to put the cutoff at 0.5, which separates both clusters.
 
 ## How I Used AI
 
