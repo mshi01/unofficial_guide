@@ -25,7 +25,7 @@ contains the answer.
 **Why this target:**
 <!-- e.g. "One of my questions is about a topic only two documents mention, so
      I expect that one to be hard." -->
-
+One of my five test questions asks about something the documents describe using different wording than the question itself — there's no exact keyword or phrase overlap between the two. Since retrieval leans on semantic similarity, I expect that question specifically to be the hard case, while the other four use vocabulary that shows up directly in the source text and should retrieve reliably.
 ---
 
 ## 2. Every answer names a source
@@ -35,7 +35,7 @@ Every answer the system produces names at least one source document.
 **Why this target:**
 <!-- Why all five and not four? What about your setup makes that achievable —
      or what would have to go wrong for it not to be? -->
-
+Whether the system pass along a souce document depends on retrieval quality and should work every time, thus I expect every answer the system produces names at least one source document. 
 ---
 
 ## 3. The relevance gate stops out-of-corpus questions
@@ -53,9 +53,13 @@ in at least 4 of 5 tries.
 <!-- What did your distances look like when you set the cutoff in Milestone 4?
      Was there a clean gap, or did the two groups overlap? -->
 
+There is an overlap between the distances of in-scope and out-of-scope questions, thus the relevance gate should catch most but not all of the out-of-scope questions.
+
 ---
 
-## 4. Something about your chunks
+## 4. No chunk is under 20 characters
+
+No chunk is under 20 characters. 
 
 <!-- YOU WRITE THIS ONE.
 
@@ -72,12 +76,12 @@ in at least 4 of 5 tries.
 
 
 **Why this target:**
-
+When I sampled chunks, most of the headings in the corpus ran roughly 15–50 characters long, with no real content attached to them. Setting the floor at 20 characters means anything shorter than that is very likely a bare heading that slipped through chunking rather than a chunk with usable content.
 
 
 ---
 
-## 5. Your choice
+## 5. Every answer comes back in under 30 seconds
 
 <!-- YOU WRITE THIS ONE TOO.
 
@@ -87,10 +91,11 @@ in at least 4 of 5 tries.
      present — anything, as long as it names a number or an observable
      outcome. -->
 
-
+Every answer comes back in under 30 seconds.
 
 **Why this target:**
 
+The system response time should not be longer than 30 seconds for a user to wait for the answer. It's a rough outer bound from user's point of view.
 
 
 ---
