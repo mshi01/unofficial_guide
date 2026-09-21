@@ -21,6 +21,11 @@
 
 ## What This Does
 
+I chose the campus_life corpus. It contains short review documents about topics in
+campus life, such as dining and housing. The corpus has 88 documents, each averaging
+317 characters (shortest 178, longest 549). Each document follows the same structure:
+a heading line, followed by two paragraphs of a few short sentences each.
+
 <!-- Three or four sentences. Which corpus you picked, and the kinds of
      questions your system answers. Write it for someone who has never seen
      this repo.
@@ -31,6 +36,7 @@
 
 **Chunk size:**
 **Overlap:**
+The campus_life corpus contains 88 short review documents, each with a heading followed by two short paragraphs of review text. I chose a chunking strategy based on paragraph breaks, removing the heading line, which resulted in 183 chunks averaging 137 characters (shortest 36, longest 373). This is better than the default chunking strategy, which produced 88 chunks — essentially one per document — since splitting by paragraph lets retrieval surface the specific paragraph relevant to a question rather than the whole review.
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -52,31 +58,6 @@
      across.
 
      Milestone 3. -->
-26 chunks total. Showing 1, spread across the corpus.
-
-Paste these into your README under Sample Chunks. The rubric asks
-for the source file and the function that produced them — both are
-printed for you below.
-
-======================================================================
-Chunk 1  |  source: thread_bike_commute.txt#0  |  produced by: chunker.py::fallback_split
-======================================================================
-THREAD: Is a bike worth it for a 20 minute walk commute?
-
---- reply 1 (14 votes) ---
-Yeah. Cuts an 18 minute walk to about 6. The thing nobody mentions is storage — covered bike parking exists at three buildings and is full by 9am at all three.
-
---- reply 2 (9 votes) ---
-Counterpoint, I sold mine. Between November and March the paths are either icy or salted and salt destroys a drivetrain in one season.
-
---- reply 3 (22 votes) ---
-Both true. I keep a cheap bike for September to November and walk the rest of the year. Total cost was about $120 for the bike and I don't care what happens to it.
-
---- reply 4 (5 votes) ---
-If you do get one, the campus does free registration and it's the only reason I got mine back after it was taken.
-
-For each one, ask: could someone answer a question using only this,
-without reading what came before or after?
 
 **Chunk 1** — source: `admin_add_drop_deadline.txt#0` — produced by: `chunker.py::split_documents`
 You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
@@ -160,9 +141,14 @@ I would like to put the cutoff at 0.5, which separates both clusters.
      Milestone 5. -->
 
 **1.**
-
+I asked Claude for a suggested cutoff, and it recommended 0.6. However, all 5 of my
+in-corpus questions had best distances between 0.33 and 0.47, so I set the threshold
+to 0.5 instead — close enough to my actual in-corpus range that it should still catch
+relevant chunks, with less margin for an unrelated question to slip through.
 **2.**
-
+I asked Claude to write a chunking function that splits text by paragraph, then added
+logic myself to skip the first paragraph since it's the heading. I also asked Claude
+to help revise my five criteria and the reasoning behind them.
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
      claims earns nothing.
