@@ -20,7 +20,7 @@ a heading line, followed by two paragraphs of a few short sentences each.
 ## Chunking Strategy
 
 **Chunk size:**
-The campus_life corpus contains 88 short review documents, each with a heading followed by two short paragraphs of review text. I chose a chunking strategy based on paragraph breaks, removing the heading line, which resulted in 183 chunks averaging 137 characters (shortest 36, longest 373). This is better than the default chunking strategy, which produced 88 chunks — essentially one per document — since splitting by paragraph lets retrieval surface the specific paragraph relevant to a question rather than the whole review.
+Since the campus_life corpus contains 88 short review documents, each with a heading followed by two short paragraphs of review text, I chose a chunking strategy based on paragraph breaks, removing the heading line, which resulted in 183 chunks averaging 137 characters (shortest 36, longest 373). This is better than the default chunking strategy, which produced 88 chunks — essentially one per document — since splitting by paragraph lets retrieval surface the specific paragraph relevant to a question rather than the whole review.
 
 **Overlap:**
 Since my chunking strategy splits on paragraph breaks, I didn't use any overlap between chunks.
@@ -121,7 +121,7 @@ Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_
 
 As shown in the table, there is a clean gap between the in-corpus max (0.4756) and out-of-corpus max (0.8243). 
 
-I would like to put the cutoff at 0.5, which separates both clusters.
+I would like to set the cutoff at 0.5, which separates both clusters.
 
 ## How I Used AI
 
