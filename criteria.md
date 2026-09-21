@@ -27,6 +27,7 @@ contains the answer.
      I expect that one to be hard." -->
 
 One of my five test questions asks about something the documents describe using different wording than the question itself — there's no exact keyword or phrase overlap between the two. Since retrieval leans on semantic similarity, I expect that question specifically to be the hard case, while the other four use vocabulary that shows up directly in the source text and should retrieve reliably.
+
 ---
 
 ## 2. Every answer names a source
@@ -38,6 +39,7 @@ Every answer the system produces names at least one source document.
      or what would have to go wrong for it not to be? -->
 
 Whether the system pass along a souce document depends on retrieval quality and should work every time, thus I expect every answer the system produces names at least one source document. 
+
 ---
 
 ## 3. The relevance gate stops out-of-corpus questions

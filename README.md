@@ -1,20 +1,5 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
-
-> **This file is your submission.** Fill it in as you go — most sections get
-> written during the milestone that produces them, not at the end.
->
-> How the starter works, and every command you'll need, is in `RUNNING.md`.
-> Leave that file alone.
->
-> **Paste everything as text.** No screenshots, no video. A typed table gets
-> full credit; a picture of the same table gets none.
->
-> Delete these instruction blocks as you replace them. The `<!-- -->` comments
-> are notes to you and don't show up when the page renders — you can leave them
-> or remove them.
-
 ---
 
 # Unit 1
@@ -35,8 +20,11 @@ a heading line, followed by two paragraphs of a few short sentences each.
 ## Chunking Strategy
 
 **Chunk size:**
-**Overlap:**
 The campus_life corpus contains 88 short review documents, each with a heading followed by two short paragraphs of review text. I chose a chunking strategy based on paragraph breaks, removing the heading line, which resulted in 183 chunks averaging 137 characters (shortest 36, longest 373). This is better than the default chunking strategy, which produced 88 chunks — essentially one per document — since splitting by paragraph lets retrieval surface the specific paragraph relevant to a question rather than the whole review.
+
+**Overlap:**
+Since my chunking strategy splits on paragraph breaks, I didn't use any overlap between chunks.
+
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -60,28 +48,33 @@ The campus_life corpus contains 88 short review documents, each with a heading f
      Milestone 3. -->
 
 **Chunk 1** — source: `admin_add_drop_deadline.txt#0` — produced by: `chunker.py::split_documents`
-You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
+
 ```
+You can add a course through the end of the second week. Dropping is a longer window — through the end of week six — but a drop after week two shows as a W on your transcript. Nothing anywhere on the registrar's site says this plainly, and students find out from each other.
 ```
 
 **Chunk 2** — source: `course_cs_340_exams.txt#1` — produced by: `chunker.py::split_documents`
-Start the term project in week three, not week eight; everyone learns this the hard way.
+
 ```
+Start the term project in week three, not week eight; everyone learns this the hard way.
 ```
 
 **Chunk 3** — source: `course_phys_130_workload.txt#0` — produced by: `chunker.py::split_documents`
-People keep asking so: 7 hours a week, plus 3 on lab weeks. That's real time, not optimistic time.
+
 ```
+People keep asking so: 7 hours a week, plus 3 on lab weeks. That's real time, not optimistic time.
 ```
 
 **Chunk 4** — source: `dining_verrill_street_grill_followup.txt#1` — produced by: `chunker.py::split_documents`
-Also worth saying: one register, so the queue is a single line no matter how busy. Nobody tells you this at orientation.
+
 ```
+Also worth saying: one register, so the queue is a single line no matter how busy. Nobody tells you this at orientation.
 ```
 
 **Chunk 5** — source: `housing_morrow_house.txt#1` — produced by: `chunker.py::split_documents`
-The good: cheapest housing tier by about $900 a year, and the singles are real singles.
+
 ```
+The good: cheapest housing tier by about $900 a year, and the singles are real singles.
 ```
 
 ## Sample Answer
@@ -93,12 +86,13 @@ The good: cheapest housing tier by about $900 a year, and the singles are real s
 When will the sandwiches be restocked after picked clean after 1:15pm weekdays in the Atrium Dining Hall?
 
 **Answer:**
+
+```
 (best distance 0.334, cutoff 0.5)
 
 After being picked clean, the sandwiches are not restocked again until the next morning (dining_the_atrium.txt and dining_the_atrium_followup.txt).
 
 Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_followup.txt, dining_the_atrium.txt, dining_the_atrium_followup.txt
-```
 ```
 
 **My relevance cutoff:**
@@ -145,6 +139,7 @@ I asked Claude for a suggested cutoff, and it recommended 0.6. However, all 5 of
 in-corpus questions had best distances between 0.33 and 0.47, so I set the threshold
 to 0.5 instead — close enough to my actual in-corpus range that it should still catch
 relevant chunks, with less margin for an unrelated question to slip through.
+
 **2.**
 I asked Claude to write a chunking function that splits text by paragraph, then added
 logic myself to skip the first paragraph since it's the heading. I also asked Claude
