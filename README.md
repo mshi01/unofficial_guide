@@ -110,7 +110,7 @@ Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_
 |---|---|---|
 | Which dining hall is the furthest from anywhere? | Yes | 0.3991 |
 | Which dining hall serves grab-and-go refrigerated sandwiches? | Yes | 0.4756 |
-| When will the sandwiches be restocked after picked clean after 1:15pm weekdays in The Atrium Dining Hall? | Yes | 0.3339|
+| When will the sandwiches be restocked after picked clean after 1:15pm weekdays in the Atrium Dining Hall? | Yes | 0.3339|
 | What worth knowing about the salad bar in Kestrel Commons after 1:30pm? | Yes |0.4208 |
 | Which dining hall opens till midnight? | Yes | 0.4275 |
 | What is the capital of Mongolia? | No | 0.8641 |
