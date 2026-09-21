@@ -25,6 +25,7 @@ contains the answer.
 **Why this target:**
 <!-- e.g. "One of my questions is about a topic only two documents mention, so
      I expect that one to be hard." -->
+
 One of my five test questions asks about something the documents describe using different wording than the question itself — there's no exact keyword or phrase overlap between the two. Since retrieval leans on semantic similarity, I expect that question specifically to be the hard case, while the other four use vocabulary that shows up directly in the source text and should retrieve reliably.
 ---
 
@@ -35,6 +36,7 @@ Every answer the system produces names at least one source document.
 **Why this target:**
 <!-- Why all five and not four? What about your setup makes that achievable —
      or what would have to go wrong for it not to be? -->
+
 Whether the system pass along a souce document depends on retrieval quality and should work every time, thus I expect every answer the system produces names at least one source document. 
 ---
 
@@ -76,6 +78,7 @@ No chunk is under 20 characters.
 
 
 **Why this target:**
+
 When I sampled chunks, most of the headings in the corpus ran roughly 15–50 characters long, with no real content attached to them. Setting the floor at 20 characters means anything shorter than that is very likely a bare heading that slipped through chunking rather than a chunk with usable content.
 
 
