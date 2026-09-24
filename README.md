@@ -171,15 +171,29 @@ to help revise my five criteria and the reasoning behind them.
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 4 of 5 | 4 of 5 | 4 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. No chunk is under 20 characters| 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Every answer comes back in under 30 seconds| 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+Example output from one of the runs:
+
+### When will the sandwiches be restocked after picked clean after 1:15pm weekdays in the Atrium Dining Hall? — run 2
+
+- Best distance: 0.3339 (passed the gate)
+- Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_followup.txt, dining_the_atrium.txt, dining_the_atrium_followup.txt
+
+```
+The sandwiches will not be restocked again until the next morning. 
+
+Sources: `dining_the_atrium.txt` and `dining_the_atrium_followup.txt`
+```
+
+
 
 ## Verdicts
 
@@ -194,11 +208,11 @@ to help revise my five criteria and the reasoning behind them.
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunk contains the answer | MET | Out of the 5 questions, the retrieved chunk failed to answer only 1. The other 4 all contained the answer. So this criterion is met.|
+| 2 | Every answer names a source | MET | All the answers come with naming a source. So this criterion is met.|
+| 3 | Gate stops out-of-corpus questions | MET | For all 5 out-of-corpus questions, gate stops giving answers. So this criterion is met. |
+| 4 | No chunk is under 20 characters | MET | Checking on the chunk size revealed that all chunks are between 36 and 373 characters long. So this criterion is met.  |
+| 5 | Every answer comes back in under 30 seconds | MET | 3 runs come back together in under 30 seconds. So this criterion is met. |
 
 ## Diagnoses
 
@@ -239,8 +253,8 @@ to help revise my five criteria and the reasoning behind them.
 | 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
 | 2. Every answer names a source | 5 of 5 |  |  |  |  |
 | 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 4. No chunk is under 20 characters | | | | | |
+| 5. Every answer comes back in under 30 seconds | | | | | |
 
 **Did it help?**
 
