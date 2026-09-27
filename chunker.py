@@ -98,9 +98,15 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
         splitting on a character count?
     """
     """
-    The corpus campus_life contains 88 documents, each document has 317 characters on average (shortest 178, longest 549). 
+    The corpus campus_life contains 88 documents, each document has 317 characters on average (shortest 178, longest 549).
     They are all short reviews. Each documents start with a heading line. Each paragargh contains several short sentences of review.
-    Thus I would like to split the document on paragraph breaks. And ignoring the first paragaph since it unusally is a heading line.
+    Thus I would like to split the document on paragraph breaks.
+
+    The title is short but not useless: body paragraphs like "Hours are
+    11:00am to 1:00am daily during term." never repeat the hall's name, so
+    without the title a chunk of pure hours/cost facts has nothing connecting
+    it to the dining hall it describes. Prepending the title keeps every
+    chunk — including the terse ones — identifiable on its own.
     """
     chunks: list[Chunk] = []
 
@@ -108,14 +114,13 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
         paragraphs = [p.strip() for p in doc.text.split("\n\n")]
         paragraphs = [p for p in paragraphs if p]
 
-        # paragraphs[0] is the document's title line — it names the topic but
-        # holds none of the advice, so the body starts at paragraphs[1].
+        title = paragraphs[0]
         body = paragraphs[1:]
 
         for index, paragraph in enumerate(body):
             chunks.append(
                 Chunk(
-                    text=paragraph,
+                    text=f"{title}: {paragraph}",
                     source=doc.source,
                     index=index,
                     produced_by="chunker.py::split_documents",

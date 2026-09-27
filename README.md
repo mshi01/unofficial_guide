@@ -121,7 +121,8 @@ Sources retrieved: dining_north_kitchen_followup.txt, dining_pellew_dining_hall_
 
 As shown in the table, there is a clean gap between the in-corpus max (0.4756) and out-of-corpus max (0.8243). 
 
-I would like to set the cutoff at 0.5, which separates both clusters.
+I would like to set the cutoff at 0.5, which separates both clusters.and their distances are not so well (0.47) compared to others (eg. 0.33).
+
 
 ## How I Used AI
 
@@ -233,13 +234,41 @@ Sources: `dining_the_atrium.txt` and `dining_the_atrium_followup.txt`
      low, and which one you'd tighten and to what.
 
      Milestone 3. -->
+All criteria were met except the first one — "retrieved chunk contains the answer" — which missed 1 out of 5 questions. I investigated the cause.
+
+For the question "Which dining hall opens till midnight?", the model responded that it didn't have enough information to answer, instead of returning the dining hall's name.
+
+Diagnosis of the retrieved chunks:
+
+Question: Which dining hall opens till midnight?
+
+Root cause: The chunking strategy is dropping the first header line during chunking, causing later chunks to lose their contextual identity. In this case, the relevant chunk — "Hours are 11:00am to 1:00am daily during term. Costs declining balance, or cash after 11:00pm." — comes from the Verril Street Grill document, but since it doesn't mention the hall's name directly, it embeds farther away from the query than other, more generic chunks that do mention hall names explicitly.
+
+|No | distance  | source |  preview|
+|---|---|---|---|
+|1|   0.4275 |    dining_halden_hall_followup.txt | Adding to what people have said about Halden Hall. T...|
+|2 |  0.4279  |   dining_pellew_dining_hall_followup.txt| Adding to what people have said about Pellew Dining ...|
+|3 |  0.4310 |    dining_north_kitchen_followup.txt |Adding to what people have said about North Kitchen....|
+|4 |  0.5171 |    dining_the_atrium_followup.txt |  Adding to what people have said about The Atrium. Th...|
+|5  | 0.5262  |   dining_halden_hall_followup.txt|  Also worth saying: closes at 7:00pm, which catches p...|
+
+The top 4 retrieved chunks were mostly generic filler text, such as "Adding to what people have said about X." These chunks cluster closely in the embedding space around general "dining hall + closing time" language.
+
+Interestingly, out of the 5 questions asked, two others (Q1 and Q2) were also "which dining hall" type questions, and both returned correct answers. Looking more closely at the retrieved chunks and source documents for those two, I found that both documents included the phrase "Adding to what people have said about X," but explicitly named the dining hall within the content — even though the header/title had been dropped during chunking.
+
+By contrast, for Q5, the chunk containing the relevant answer information does not name the specific dining hall anywhere in its content. As a result, the model had no way to generate the correct answer from the retrieved chunks alone.
+
+
 
 ## The Improvement
 
 **What I changed:**
 
+To fix this, I propose prepending the dining hall name (from the title/header line) to every chunk, instead of discarding it during chunking.
+
 **Why I picked it:**
 
+This ensures each chunk retains its association with the correct dining hall name, so relevant context isn't lost even when chunks are split apart from their original headers.
 <!-- Connect it to a specific diagnosis above in one sentence. If you can't,
      you picked a fix because it sounded impressive. -->
 
@@ -247,17 +276,28 @@ Sources: `dining_the_atrium.txt` and `dining_the_atrium_followup.txt`
 
 <!-- Same format, same five criteria, three runs each.
      `python run_eval.py --label after` -->
+| Question | Best distance (Before)| Best distance (After Title Prepend) |
+|---|---|---|
+| Which dining hall is the furthest from anywhere? | 0.3991 | 0.247 |
+| Which dining hall serves grab-and-go refrigerated sandwiches? | 0.4756 | 0.449 |
+| When will the sandwiches be restocked after picked clean after 1:15pm weekdays in the Atrium Dining Hall? | 0.3339 | 0.299 |
+| What worth knowing about the salad bar in Kestrel Commons after 1:30pm? | 0.4208 | 0.273 |
+| Which dining hall opens till midnight? | 0.4275 | 0.400 |
 
+
+### Verdicts
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. No chunk is under 20 characters | | | | | |
-| 5. Every answer comes back in under 30 seconds | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 4 of 5 | 4 of 5 | 4 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. No chunk is under 20 characters | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 5. Every answer comes back in under 30 seconds | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+
 
 **Did it help?**
 
+This change significantly improved the best distances, especially for Q1, Q3, and Q4, as shown in the before/after comparison above. However, Q5 still failed across all 3 runs even after title prepending during chunking.
 <!-- Say plainly whether it did, and how you know. If it made things worse,
      say that — a change that backfired, honestly reported, earns full credit
      and is more interesting than one that worked. What matters is that you can
@@ -266,6 +306,47 @@ Sources: `dining_the_atrium.txt` and `dining_the_atrium_followup.txt`
      Milestone 4. -->
 
 ## What's Still Broken
+Q5 still failed across all 3 runs — the model continued to return that it had no information to answer the question. After examining the retrieved chunks, the top results were chunks listing open/close times in general, but not the one containing the correct answer.
+
+Question: Which dining hall opens till midnight?
+
+| No | distance |source  |                         preview|
+|---|---|---|---|
+|1  | 0.4001  |   dining_halden_hall_followup.txt | Re: Halden Hall: Also worth saying: closes at 7:00pm...|
+|2  | 0.4448  |   dining_halden_hall.txt   |        Halden Hall: Hours are 7:30am to 7:00pm weekdays, cl...|
+|3 |  0.4538  |   dining_halden_hall_followup.txt | Re: Halden Hall: Adding to what people have said abo...|
+|4  | 0.4589  |   dining_north_kitchen_followup.txt| Re: North Kitchen: Adding to what people have said a...|
+|5  | 0.4718  |  dining_pellew_dining_hall_followup.txt| Re: Pellew Dining Hall: Adding to what people have s...|
+
+The top retrieved chunks were still generic filler text, such as "Adding to what people have said about X." which contains "dining hall + opening/closing time" language.
+
+## Rephrase the query to near-vertatim match
+I then tried rephrasing the query as "which dining hall hours are from 11:00am to 1:00am daily during term?" — containing a near-verbatim match to the answer string ("11:00am to 1:00am daily during term"):
+
+| No | distance |source  |
+|---|---|---|
+|1 | 0.3545 | Halden Hall: Hours are 7:30am to 7:00pm weekdays...|
+|2  |0.3983 | Pellew Dining Hall: Hours are 7:00am to 8:00pm daily...|
+|3 | 0.4221|  The Atrium: Hours are 8:00am to 6:00pm weekdays... |
+
+Even then, the correct chunk — despite containing an almost word-for-word match to the query — ranked 19th, at a distance of 0.594, above the gate's 0.5 cutoff, while the other generic filler text still ranked higher. So gate.py correctly refused to answer: nothing that passed the cutoff actually supported a valid answer.
+
+**Root cause**: Why the title fix didn't solve Q5: the failure isn't a missing-context problem — it's a vocabulary/semantic-gap problem in the embedding model itself.
+
+all-MiniLM-L6-v2 is a small, general-purpose bi-encoder. It's good at topical/lexical similarity, not at temporal reasoning: it has no strong basis for treating "1:00am" as close to "midnight," or "opens till midnight" as a paraphrase of "Hours are ... to 1:00am." Meanwhile, the top-ranked chunks — Halden Hall closing at 7pm, Pellew "Dining Hall" (matching on its own name), generic "Adding to what people have said..." filler — win purely because they share more surface vocabulary with the query ("dining hall," "hours," "closes/opens"), regardless of whether their actual answer is anywhere close to correct.
+
+So this is a real limitation of the embedding model on numeric/temporal paraphrase, not a pipeline bug.
+
+
+## Fix attempt: Hybrid search
+To address this, I added keyword search (BM25) and combined it with semantic search via hybrid_store.py::search.
+
+This combines the existing semantic search (store.py::search, cosine distance over all-MiniLM-L6-v2 embeddings) with a new keyword search (bm25_store.py::search, BM25 over tokenized chunk text). The two rankings are merged using Reciprocal Rank Fusion: each chunk earns a score of 1/(RRF_K + rank) from each retriever it appears in, and these are summed and then scaled against the best possible score (rank 1 in both lists), keeping the result interpretable across different questions. The fused score is not a cosine distance, even though it follows the same convention (0 = best possible, 1 = worst) — it requires its own gate cutoff, config.HYBRID_THRESHOLD, calibrated separately from config.THRESHOLD. It's enabled via --mode hybrid on app.py retrieve / app.py ask.
+
+This directly addresses the gap identified in testing: several documents share a near-identical templated sentence, which the embedding model barely distinguishes since it captures overall meaning rather than exact numbers. BM25 catches these cases by scoring exact term overlap — for example, it correctly ranks the chunk containing "1:00am" first for a query naming that exact time, whereas semantic search alone had ranked it 19th out of 183.
+
+However, Q5 still fails in the hybrid mode.
+
 
 <!-- For each criterion still missed after your fix: what you'd do about it,
      and why you stopped where you did.
@@ -276,6 +357,12 @@ Sources: `dining_the_atrium.txt` and `dining_the_atrium_followup.txt`
      Milestone 5. -->
 
 ## What I'd Do Differently
+
+Switching to a hybrid approach (adding BM25 keyword search alongside the embeddings) helps but doesn't fully fix it. Reciprocal Rank Fusion can still favor a chunk that ranks moderately well in both retrievers over one that's the clear #1 match in only one of them — it rewards consistency across both signals rather than a single confident hit. For Q5 specifically, the correct chunk was BM25's top match but ranked poorly in the semantic list, so the fused score lands below a chunk that placed second in both.
+
+To surface it in the fused top-5, a few knobs are worth trying later: lowering RRF_K (which sharpens how much a rank-1 hit dominates over a rank-19 hit), widening fetch_k/top_k for hybrid mode, or moving to a weighted fusion that favors BM25 over the embedding for queries like this one.
+
+
 
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?

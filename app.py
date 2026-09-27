@@ -34,6 +34,7 @@ def cmd_index(args):
     from ingest import load_documents, describe as describe_docs
     from chunker import split_documents, describe as describe_chunks
     from store import build_index
+    from bm25_store import build_index as build_bm25_index
 
     corpus = args.corpus or config.CORPUS
     print(f"Corpus: {corpus}")
@@ -49,8 +50,10 @@ def cmd_index(args):
     print(f"  embedding {len(chunks)} chunks (first run downloads the model)...")
     count = build_index(chunks, corpus=corpus, variant=args.variant)
 
+    build_bm25_index(chunks, corpus=corpus, variant=args.variant)
+
     elapsed = time.time() - started
-    print(f"  stored   {count} chunks in {elapsed:.1f}s")
+    print(f"  stored   {count} chunks in {elapsed:.1f}s (semantic + BM25)")
     print(f"\nReady. Try: python app.py ask \"your question here\"")
 
 
@@ -146,15 +149,40 @@ def cmd_chunks(args):
 
 def cmd_retrieve(args):
     """Milestone 4. Retrieval only, with distances, and no model call."""
-    from store import search
     import gate
 
-    results = search(
-        args.question,
-        top_k=args.top_k or config.TOP_K,
-        corpus=args.corpus or config.CORPUS,
-        variant=args.variant,
-    )
+    corpus = args.corpus or config.CORPUS
+    top_k = args.top_k or config.TOP_K
+
+    if args.mode == "bm25":
+        from bm25_store import search as bm25_search
+
+        hits = bm25_search(args.question, top_k=top_k, corpus=corpus, variant=args.variant)
+        if not hits:
+            print("Nothing came back. Have you run `python app.py index`?")
+            return
+
+        print(f"\nQuestion: {args.question}\n")
+        print(f"{'#':<3} {'score':<10} {'source':<32} preview")
+        print("-" * 100)
+        for i, h in enumerate(hits, 1):
+            preview = h.text[:52].replace("\n", " ")
+            print(f"{i:<3} {h.score:<10.4f} {h.source:<32} {preview}...")
+        print("\nHigher is better. BM25 scores exact term overlap, not meaning,")
+        print("and aren't on the same scale as cosine distance — there's no")
+        print("gate cutoff for keyword-only search here.")
+        return
+
+    if args.mode == "hybrid":
+        from hybrid_store import search as hybrid_search
+
+        results = hybrid_search(args.question, top_k=top_k, corpus=corpus, variant=args.variant)
+        threshold = config.HYBRID_THRESHOLD
+    else:
+        from store import search as semantic_search
+
+        results = semantic_search(args.question, top_k=top_k, corpus=corpus, variant=args.variant)
+        threshold = config.THRESHOLD
 
     if not results:
         print("Nothing came back. Have you run `python app.py index`?")
@@ -167,9 +195,12 @@ def cmd_retrieve(args):
         preview = r.text[:52].replace("\n", " ")
         print(f"{i:<3} {r.distance:<10.4f} {r.source:<32} {preview}...")
 
-    decision = gate.check(results)
+    decision = gate.check(results, threshold=threshold)
     print(f"\nGate: {decision.explanation}")
     print("\nLower is better. 0.3 is a close match, 0.9 is unrelated.")
+    if args.mode == "hybrid":
+        print("This is a fused RRF score, not a cosine distance — it needs its")
+        print("own calibration (config.HYBRID_THRESHOLD), same process as below.")
     print("Milestone 4: run your five questions, then the five in OUT_OF_SCOPE")
     print("that your documents clearly don't cover, and look for the gap")
     print("between the two groups. Your cutoff goes in that gap.")
@@ -181,6 +212,7 @@ def ask_pipeline(
     variant="default",
     top_k=None,
     threshold=None,
+    mode="semantic",
     on_gate=None,
     on_prompt=None,
 ):
@@ -199,9 +231,15 @@ def ask_pipeline(
     prompt just before it goes out — that's how `--show-prompt` shows you the
     prompt while the model is still thinking rather than after.
     """
-    from store import search
     import gate
     from generate import answer_from_chunks, build_prompt
+
+    if mode == "hybrid":
+        from hybrid_store import search
+        default_threshold = config.HYBRID_THRESHOLD
+    else:
+        from store import search
+        default_threshold = config.THRESHOLD
 
     results = search(
         question,
@@ -209,7 +247,7 @@ def ask_pipeline(
         corpus=corpus or config.CORPUS,
         variant=variant,
     )
-    decision = gate.check(results, threshold=threshold)
+    decision = gate.check(results, threshold=threshold if threshold is not None else default_threshold)
     if on_gate is not None:
         on_gate(decision)
 
@@ -242,6 +280,7 @@ def _ask_one(
     variant,
     top_k,
     threshold,
+    mode="semantic",
     show_distances=True,
     show_prompt=False,
 ):
@@ -269,6 +308,7 @@ def _ask_one(
         variant=variant,
         top_k=top_k,
         threshold=threshold,
+        mode=mode,
         on_gate=print_distances if show_distances else None,
         on_prompt=print_prompt if show_prompt else None,
     )
@@ -294,6 +334,7 @@ def cmd_ask(args):
                 args.variant,
                 args.top_k,
                 args.threshold,
+                mode=args.mode,
                 show_prompt=args.show_prompt,
             )
         else:
@@ -312,6 +353,7 @@ def cmd_ask(args):
                     args.variant,
                     args.top_k,
                     args.threshold,
+                    mode=args.mode,
                     show_prompt=args.show_prompt,
                 )
     finally:
@@ -360,12 +402,24 @@ def build_parser():
     p_ret = sub.add_parser("retrieve", help="show distances only (Milestone 4)")
     p_ret.add_argument("question")
     p_ret.add_argument("--top-k", type=int)
+    p_ret.add_argument(
+        "--mode",
+        choices=["semantic", "bm25", "hybrid"],
+        default="semantic",
+        help="which retriever to use (unit 2 stretch: bm25, hybrid)",
+    )
     p_ret.set_defaults(func=cmd_retrieve)
 
     p_ask = sub.add_parser("ask", help="ask a question")
     p_ask.add_argument("question", nargs="?")
     p_ask.add_argument("--top-k", type=int)
     p_ask.add_argument("--threshold", type=float, help="override the gate cutoff")
+    p_ask.add_argument(
+        "--mode",
+        choices=["semantic", "hybrid"],
+        default="semantic",
+        help="which retriever to use (unit 2 stretch: hybrid)",
+    )
     p_ask.add_argument(
         "--show-prompt",
         action="store_true",

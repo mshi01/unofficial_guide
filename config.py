@@ -46,6 +46,23 @@ TOP_K = 5               # how many chunks to pull back per question
 THRESHOLD = 0.5
 
 
+# ─── Hybrid search (unit 2 stretch: BM25 + embeddings) ───────────────────────
+# hybrid_store.py combines store.py's semantic search with bm25_store.py's
+# keyword search via Reciprocal Rank Fusion — blending by each hit's rank in
+# the two result lists rather than by raw score, since a cosine distance and
+# a BM25 score aren't on comparable scales to begin with.
+
+RRF_K = 60      # standard RRF constant; higher flattens the influence of rank
+
+# The "distance" hybrid_store.search() returns is NOT a cosine distance, even
+# though it's shaped the same way (0 = best possible fused rank, 1 = worst).
+# It's on its own scale, so THRESHOLD above doesn't carry over. Calibrate this
+# the same way Milestone 4 calibrated THRESHOLD: run your five in-scope and
+# five out-of-scope questions through `python app.py retrieve --mode hybrid`
+# and put the cutoff in the gap you actually see.
+HYBRID_THRESHOLD = 0.5
+
+
 # ─── Models ──────────────────────────────────────────────────────────────────
 # Embeddings run on your own machine and cost no API quota.
 # Only generation calls out to a service.
@@ -77,6 +94,7 @@ CACHE_DIR = ROOT / ".cache"
 
 CORPORA_DIR = ROOT / "corpora"
 CHROMA_DIR = ROOT / "chroma_db"
+BM25_DIR = ROOT / "bm25_index"
 RESULTS_DIR = ROOT / "results"
 
 
