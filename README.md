@@ -145,10 +145,13 @@ relevant chunks, with less margin for an unrelated question to slip through.
 I asked Claude to write a chunking function that splits text by paragraph, then added
 logic myself to skip the first paragraph since it's the heading. I also asked Claude
 to help revise my five criteria and the reasoning behind them.
-<!-- ── Stretch features ─────────────────────────────────────────────────────
-     Doing one? Say so here BEFORE you start. A feature this README never
-     claims earns nothing.
-     ───────────────────────────────────────────────────────────────────────── -->
+
+**3.**
+I asked Claude to explain why my first fix for Q5 was still failing and to suggest further fixes.
+
+**4.**
+I asked Claude about the Hybrid Search (BM25) approach, having it explain beforehand why it might fix the issue, then explain afterward why it didn't fully resolve it.
+
 
 ---
 
