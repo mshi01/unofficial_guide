@@ -124,35 +124,6 @@ As shown in the table, there is a clean gap between the in-corpus max (0.4756) a
 I would like to set the cutoff at 0.5, which separates both clusters.and their distances are not so well (0.47) compared to others (eg. 0.33).
 
 
-## How I Used AI
-
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
-
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
-
-**1.**
-I asked Claude for a suggested cutoff, and it recommended 0.6. However, all 5 of my
-in-corpus questions had best distances between 0.33 and 0.47, so I set the threshold
-to 0.5 instead — close enough to my actual in-corpus range that it should still catch
-relevant chunks, with less margin for an unrelated question to slip through.
-
-**2.**
-I asked Claude to write a chunking function that splits text by paragraph, then added
-logic myself to skip the first paragraph since it's the heading. I also asked Claude
-to help revise my five criteria and the reasoning behind them.
-
-**3.**
-I asked Claude to explain why my first fix for Q5 was still failing and to suggest further fixes.
-
-**4.**
-I asked Claude about the Hybrid Search (BM25) approach, having it explain beforehand why it might fix the issue, then explain afterward why it didn't fully resolve it.
-
-
 ---
 
 # Unit 2
@@ -336,9 +307,7 @@ Even then, the correct chunk — despite containing an almost word-for-word matc
 
 **Root cause**: Why the title fix didn't solve Q5: the failure isn't a missing-context problem — it's a vocabulary/semantic-gap problem in the embedding model itself.
 
-all-MiniLM-L6-v2 is a small, general-purpose bi-encoder. It's good at topical/lexical similarity, not at temporal reasoning: it has no strong basis for treating "1:00am" as close to "midnight," or "opens till midnight" as a paraphrase of "Hours are ... to 1:00am." Meanwhile, the top-ranked chunks — Halden Hall closing at 7pm, Pellew "Dining Hall" (matching on its own name), generic "Adding to what people have said..." filler — win purely because they share more surface vocabulary with the query ("dining hall," "hours," "closes/opens"), regardless of whether their actual answer is anywhere close to correct.
-
-So this is a real limitation of the embedding model on numeric/temporal paraphrase, not a pipeline bug.
+all-MiniLM-L6-v2 is a small, general-purpose bi-encoder. It's good at topical/lexical similarity, not at temporal reasoning: it has no strong basis for treating "1:00am" as close to "midnight," or "opens till midnight" as a paraphrase of "Hours are ... to 1:00am." Meanwhile, the top-ranked chunks — Halden Hall closing at 7pm, Pellew "Dining Hall" (matching on its own name), generic "Adding to what people have said..." filler — win purely because they share more surface vocabulary with the query ("dining hall," "hours," "closes/opens"), regardless of whether their actual answer is anywhere close to correct. So this is a real limitation of the embedding model on numeric/temporal paraphrase, not a pipeline bug.
 
 
 ## Fix attempt: Hybrid search
@@ -348,7 +317,7 @@ This combines the existing semantic search (store.py::search, cosine distance ov
 
 This directly addresses the gap identified in testing: several documents share a near-identical templated sentence, which the embedding model barely distinguishes since it captures overall meaning rather than exact numbers. BM25 catches these cases by scoring exact term overlap — for example, it correctly ranks the chunk containing "1:00am" first for a query naming that exact time, whereas semantic search alone had ranked it 19th out of 183.
 
-However, Q5 still fails in the hybrid mode.
+However, Q5 still fails in answer in the hybrid mode.
 
 
 <!-- For each criterion still missed after your fix: what you'd do about it,
@@ -371,3 +340,31 @@ To surface it in the fused top-5, a few knobs are worth trying later: lowering R
      differently, and why?
 
      Milestone 5. -->
+## How I Used AI
+
+<!-- Two specific moments. For each: what you asked for, what came back, and
+     what you changed about it.
+
+     "I asked Claude to write the chunking function from my notes. It ignored
+     the overlap, so I added that myself" is the level of detail we're after.
+     "I used AI to help me code" is not.
+
+     Milestone 5. -->
+
+**1.**
+I asked Claude for a suggested cutoff, and it recommended 0.6. However, all 5 of my
+in-corpus questions had best distances between 0.33 and 0.47, so I set the threshold
+to 0.5 instead — close enough to my actual in-corpus range that it should still catch
+relevant chunks, with less margin for an unrelated question to slip through.
+
+**2.**
+I asked Claude to write a chunking function that splits text by paragraph, then added
+logic myself to skip the first paragraph since it's the heading. I also asked Claude
+to help revise my five criteria and the reasoning behind them.
+
+**3.**
+I asked Claude to explain why my first fix for Q5 was still failing and to suggest further fixes.
+
+**4.**
+I asked Claude about the Hybrid Search (BM25) approach, having it explain beforehand why it might fix the issue, then explain afterward why it didn't fully resolve it.
+
